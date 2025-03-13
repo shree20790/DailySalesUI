@@ -1,22 +1,18 @@
 import apiService from "../appClient";
+
 const userRoleService = {
-  
   getAllUserRoles: (includeInactive = true) => 
     apiService.get("UserRole/getAllUserRoles", { includeInActive: includeInactive }),
 
   getUserRoleById: (Id) => apiService.get(`UserRole/getUserRoleById/${Id}`),
 
-  createUserRole: (userData) => apiService.post("UserRole/addUserRole", userData),
+  createUserRole: (roleData) => apiService.post("UserRole/addUserRole", roleData),
 
-  updateUserRole: (Id, userData) => apiService.put(`UserRole/updateUserRole`, userData),
+  updateUserRole: (Id, roleData) => apiService.put(`UserRole/updateUserRole`, roleData),
 
   deleteUserRole: (Id) => apiService.delete(`UserRole/DeleteUserRole/${Id}`),
 
-  uploadUserRoleDocument: (Id, file) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    return apiService.postFormData(`UserRole/upload/${Id}`, formData);
-  },
+  getPaginatedUserRoles: ({ page, pageSize, searchTerm, sortField, sortDirection }) => apiService.post("UserRole/getPaginateduserRoles",{ page, pageSize, searchTerm, sortField, sortDirection }),
 };
 
 export default userRoleService;

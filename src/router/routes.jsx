@@ -5,12 +5,12 @@ const Index = lazy(() => import('../pages/index'));
 // const LeadList = lazy(() => import('../pages/leads/LeadList'));
 //const UserList = lazy(() => import('../pages/users/UserList'));
 // const LeadDetails = lazy(() => import('../pages/leads/LeadDetails'));
-//const UserRoleList = lazy(() => import('../pages/userRoles/UserRoleList'));
+const UserRoleList = lazy(() => import('../pages/userRoles/UserRoleList'));
 // const MenuList = lazy(() => import('../pages/menu/MenuList'));
 //const CategoryList = lazy(() => import('../pages/category/CategoryList'));
-//const UserRoleMappingList = lazy(() => import('../pages/userRoleMapping/UserRoleMappingList'));
+const UserRoleMappingList = lazy(() => import('../pages/userRoleMapping/UserRoleMappingList'));
 //const CustomerList = lazy(() => import('../pages/customers/CustomerList'));
-// const MenuRoleMappingList = lazy(() => import('../pages/MenuRoleMapping/MenuRoleMappingList'));
+const MenuRoleMappingList = lazy(() => import('../pages/MenuRoleMapping/MenuRoleMappingList'));
 //const SubCategoryList = lazy(() => import('../pages/subcategory/SubCategoryList'));
 //const Settings = lazy(() => import('../pages/settings/Setting'));
 //const UserProfile = lazy(() => import('../pages/userprofile/userProfile'));
@@ -164,10 +164,10 @@ const routes = [
     //     path: '/userList',
     //     element: <UserList />,
     // },
-    // {
-    //     path: '/userRoleList',
-    //     element: <UserRoleList />,
-    // },
+    {
+         path: '/userRoleList',
+         element: <UserRoleList />,
+    },
     // // {
     // //     path: '/menuList',
     // //     element: <MenuList />,
@@ -176,14 +176,14 @@ const routes = [
     //     path: '/categoryList',
     //     element: <CategoryList />,
     // },
-    // {
-    //     path: '/userRoleMappingList',
-    //     element: <UserRoleMappingList />,
-    // },
-    // // {
-    // //     path: '/menuRoleMappingList',
-    // //     element: <MenuRoleMappingList />,
-    // // },
+    {
+        path: '/userRoleMappingList',
+         element: <UserRoleMappingList />,
+     },
+     {
+         path: '/menuRoleMappingList',
+        element: <MenuRoleMappingList />,
+     },
     // {
     //     path: '/subCategoryList',
     //     element: <SubCategoryList />,

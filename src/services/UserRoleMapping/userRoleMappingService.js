@@ -1,22 +1,18 @@
 import apiService from "../appClient";
+
 const userRoleMappingService = {
-  
-  getAllUserRoleMappings: (includeInactive = true) => 
-    apiService.get("UserRoleMapping/getAllUserRoleMappings", { includeInActive: includeInactive }),
+  getAllUserRoleMappings: () => apiService.get("UserRoleMapping/getAllUserRoleMappings"),
 
-  getUserRoleMappingById: (Id) => apiService.get(`UserRoleMapping/getUserRoleMappingById/${Id}`),
+  getUserRoleMappingById: (id) => apiService.get(`UserRoleMapping/getUserRoleMappingById/${id}`),
 
-  createUserRoleMapping: (userData) => apiService.post("UserRoleMapping/addUserRoleMapping", userData),
+  addUserRoleMapping: (userRoleMappingData) => apiService.post("UserRoleMapping/addUserRoleMapping", userRoleMappingData),
 
-  updateUserRoleMapping: (Id, userData) => apiService.put(`UserRoleMapping/updateUserRoleMapping`, userData),
+  updateUserRoleMapping: (userRoleMappingData) => apiService.put("UserRoleMapping/updateUserRoleMapping", userRoleMappingData),
 
-  deleteUserRoleMapping: (Id) => apiService.delete(`UserRoleMapping/DeleteUserRoleMapping/${Id}`),
+  deleteUserRoleMapping: (id) => apiService.delete(`UserRoleMapping/DeleteUserRoleMapping/${id}`),
 
-  uploadUserRoleMappingDocument: (Id, file) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    return apiService.postFormData(`UserRoleMapping/upload/${Id}`, formData);
-  },
+  getPaginatedUserRoleMappings: (paginationParams) => 
+    apiService.post("UserRoleMapping/getPaginatedUserRoleMappings", paginationParams),
 };
 
 export default userRoleMappingService;

@@ -5,7 +5,7 @@ import UserRoleMappingListInfo from './UserRoleMappingListInfo';
 const UserRoleMappingList = () => {
   return (
     <UserRoleMappingListInfo
-        apiUrl="https://finverse.finoracles.com:8082/api/UserRoleMapping/getPaginatedUserRoleMappings"
+        apiUrl="https://dailysales.skylynxtech.com:8082/api/UserRoleMapping/getPaginatedUserRoleMappings"
     />
   );
 };
