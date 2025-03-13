@@ -5,30 +5,11 @@ import debounce from "lodash.debounce";
 import Select from 'react-select';
 import ClientHistoryService from "../../services/ClientHistory/clientHistoryService";
 import AlertService from "../../utils/AlertService";
-import IconPlus from "../../components/Icon/IconPlus"; // Ensure this import is correct
+import IconPlus from "../../components/Icon/IconPlus";
 import IconTrashLines from "../../components/Icon/IconTrashLines";
 import IconEdit from "../../components/Icon/IconEdit";
 import SelectStyles from "../../utils/SelectStyles";
-
-// Utility function to fetch customer names
-const fetchCustomerNames = async () => {
-  try {
-    const response = await fetch("https://dailysales.skylynxtech.com:8082/api/CustomerProfile/getAllCustomerProfiles?includeInActive=true");
-    const data = await response.json();
-    if (data.isSuccess && Array.isArray(data.output)) {
-      return data.output.map(customer => ({
-        id: customer.id,
-        customerName: customer.customerName,
-        mobileNumber: customer.mobileNumber
-      }));
-    } else {
-      throw new Error("Failed to fetch customer names");
-    }
-  } catch (err) {
-    console.error("Error fetching customer names:", err);
-    return [];
-  }
-};
+import clientService from "../../services/Client/clientservice"; // Import your clientService
 
 const ClientHistory = () => {
   const [clientHistories, setClientHistories] = useState([]);
@@ -52,15 +33,18 @@ const ClientHistory = () => {
     clientAttendBy: "",
   });
   const [displayHistory, setDisplayHistory] = useState([]);
-  const[count,setCount]=useState(0)
-  console.log(displayHistory);
+  const [count, setCount] = useState(0);
+  const [mobileNumberSuggestions, setMobileNumberSuggestions] = useState([]);
 
-  // Fetch Client Histories
+  const handleMobileSuggestionClick = (suggestion) => {
+    setEditedClientHistory({ ...editedClientHistory, mobileNumber: suggestion });
+    setMobileNumberSuggestions([]);
+  };
+
   useEffect(() => {
     const fetchClientHistories = async () => {
       setLoading(true);
       try {
-        console.log("Fetching Client Histories...");
         const response = await ClientHistoryService.getPaginatedClientHistories(currentPage, rowsPerPage);
         let respData = await response.data;
 
@@ -69,7 +53,6 @@ const ClientHistory = () => {
         }
         setClientHistories(respData.output.result);
         setTotalRows(respData.output.rowCount);
-
         setDisplayHistory(respData.output.result);
       } catch (err) {
         setError(err.message || "Error loading client histories");
@@ -79,25 +62,36 @@ const ClientHistory = () => {
     };
 
     fetchClientHistories();
-  }, [currentPage, rowsPerPage, searchQuery,count]);
+  }, [currentPage, rowsPerPage, searchQuery, count]);
 
-  // Fetch Customer Names
   useEffect(() => {
     const fetchNames = async () => {
-      const names = await fetchCustomerNames();
-      setCustomerNames(names);
+      try {
+        const response = await clientService.getAllClients(true); 
+        if (response.data.isSuccess && Array.isArray(response.data.output)) {
+          const names = response.data.output.map(customer => ({
+            id: customer.id,
+            customerName: customer.customerName,
+            mobileNumber: customer.mobileNumber
+          }));
+          setCustomerNames(names);
+        } else {
+          throw new Error("Failed to fetch customer names");
+        }
+      } catch (err) {
+        console.error("Error fetching customer names:", err);
+        setCustomerNames([]);
+      }
     };
 
     fetchNames();
   }, []);
 
-  // Handle Search
   const handleSearch = debounce((e) => {
     setSearchQuery(e.target.value);
     setCurrentPage(1);
   }, 500);
 
-  // Handle Edit
   const handleEdit = (clientHistory) => {
     const selectedCustomer = customerNames.find(item => item.id === clientHistory.CustomerId) || { id: clientHistory.CustomerId, customerName: clientHistory.CustomerName, mobileNumber: clientHistory.MobileNumber };
     setEditedClientHistory({
@@ -113,7 +107,6 @@ const ClientHistory = () => {
     setEditModalOpen(true);
   };
 
-  // Handle Modal Close
   const handleModalClose = () => {
     setEditModalOpen(false);
     setAddTaskModal(false);
@@ -129,32 +122,39 @@ const ClientHistory = () => {
     });
   };
 
-  // Handle Input Change
   const handleInputChange = (e) => {
     const value = e.target.type === "checkbox" ? e.target.checked : e.target.value;
     setEditedClientHistory({ ...editedClientHistory, [e.target.name]: value });
+
+    if (e.target.name === "mobileNumber") {
+      const inputMobile = e.target.value;
+      if (inputMobile.length >= 2) {
+        const suggestions = customerNames
+          .filter(customer => customer.mobileNumber.startsWith(inputMobile))
+          .map(customer => customer.mobileNumber);
+        setMobileNumberSuggestions(suggestions);
+      } else {
+        setMobileNumberSuggestions([]);
+      }
+    }
   };
 
-  // Handle Select Change
   const handleSelectChange = (selectedOption, actionMeta) => {
     const selectedCustomer = customerNames.find(customer => customer.id === selectedOption.value);
-    setEditedClientHistory({ 
-      ...editedClientHistory, 
-      customerId: selectedOption.value, 
+    setEditedClientHistory({
+      ...editedClientHistory,
+      customerId: selectedOption.value,
       customerName: selectedOption.label,
-      mobileNumber: selectedCustomer ? selectedCustomer.mobileNumber : ""
     });
   };
 
-  // Handle Update
   const handleUpdate = async (e) => {
     e.preventDefault();
-    console.log("Updating Client History:", editedClientHistory); // Add this line
     try {
       const updatedClientHistory = {
         ...editedClientHistory,
       };
-      const response = await ClientHistoryService.updateClientHistory(updatedClientHistory);
+      await ClientHistoryService.updateClientHistory(updatedClientHistory);
       setClientHistories((prev) =>
         prev.map((client) => (client.id === editedClientHistory.id ? updatedClientHistory : client))
       );
@@ -163,16 +163,14 @@ const ClientHistory = () => {
       );
       AlertService.success("Client history updated successfully!");
       handleModalClose();
-      setCount((prev)=>prev+1)
+      setCount((prev) => prev + 1);
     } catch (err) {
       AlertService.warning("Failed to update client history");
     }
   };
 
-  // Handle Create
   const handleCreateClientHistory = async (e) => {
     e.preventDefault();
-    console.log("Creating Client History:", editedClientHistory); // Add this line
     try {
       const newClientHistory = {
         ...editedClientHistory,
@@ -184,13 +182,12 @@ const ClientHistory = () => {
       setTotalRows((prev) => prev + 1);
       AlertService.success("Client history added successfully!");
       handleModalClose();
-      setCount((prev)=>prev+1);
+      setCount((prev) => prev + 1);
     } catch (err) {
       AlertService.warning("Failed to add client history");
     }
   };
-  
-  // Handle Delete
+
   const handleDelete = async (id) => {
     try {
       await ClientHistoryService.deleteClientHistory(id);
@@ -202,6 +199,7 @@ const ClientHistory = () => {
       AlertService.warning("Failed to delete client history");
     }
   };
+
 
   // Pagination Handler
   const handlePageChange = (direction) => {
@@ -393,22 +391,39 @@ const ClientHistory = () => {
                             isSearchable
                             required
                             menuPosition="fixed"
-                            placeholder="Select"
                           />
                         </div>
-                        <div className="mb-6">
-                          <label htmlFor="mobileNumber" className="block font-medium text-gray-700">Mobile Number</label>
-                          <input
-                            type="text"
-                            id="mobileNumber"
-                            name="mobileNumber"
-                            value={editedClientHistory.mobileNumber || ""}
-                            onChange={handleInputChange}
-                            className="form-input w-full"
-                            required
-                            placeholder="Mobile Number"
-                            readOnly
+                        <div className="mb-6 relative">
+                           <label htmlFor="mobileNumber" className="block font-medium text-gray-700">Mobile Number</label>
+                         <input
+                           type="text"
+                           id="mobileNumber"
+                           name="mobileNumber"
+                           styles={SelectStyles}
+                           value={editedClientHistory.mobileNumber || ""}
+                           onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
+                            if (value.length <= 10) {
+                                handleInputChange({ target: { name: "mobileNumber", value } });
+                            }
+                        }}
+                           className="form-input w-full"
+                           required
+                           placeholder="Search..."
                           />
+                          {mobileNumberSuggestions.length > 0 && (
+                          <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+                            {mobileNumberSuggestions.map((suggestion, index) => (
+                            <li
+                              key={index}
+                             className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+                             onClick={() => handleMobileSuggestionClick(suggestion)}
+                            >
+                           {suggestion}
+                            </li>
+                            ))}
+                          </ul>
+                          )}
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">

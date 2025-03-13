@@ -1,18 +1,16 @@
 import React, { useState } from "react";
-import axios from "axios";
+import appointmentHistoryService from "../../services/AppointmentReport/appointmentService";
 
 const AppointmentHistoryReport = () => {
     const [createDate, setCreateDate] = useState("");
     const [data, setData] = useState([]);
-    const [downloadUrl, setDownloadUrl] = useState("");
 
     const handleDateChange = async (e) => {
         const selectedDate = e.target.value;
         setCreateDate(selectedDate);
-        setDownloadUrl(`https://dailysales.skylynxtech.com:8082/excelDownload?reportType=StaffInfoHistory&createDate=${selectedDate}`);
 
         try {
-            const response = await axios.get(`https://dailysales.skylynxtech.com:8082/api/StaffInfo/getStaffInfoByDate?reportType=staffinfohistory&createDate=${selectedDate}`);
+            const response = await appointmentHistoryService.getAppointmentHistoryByDate(selectedDate);
             if (response.data.isSuccess) {
                 setData(response.data.output);
             } else {
@@ -27,11 +25,11 @@ const AppointmentHistoryReport = () => {
 
     const handleDownload = async () => {
         try {
-            const response = await axios.get(downloadUrl, { responseType: 'blob' });
+            const response = await appointmentHistoryService.downloadAppointmentHistoryReport(createDate);
             const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
+            const link = document.createElement("a");
             link.href = url;
-            link.setAttribute('download', `StaffInfoHistoryReport_${createDate}.xlsx`);
+            link.setAttribute("download", `StaffInfoHistoryReport_${createDate}.xlsx`);
             document.body.appendChild(link);
             link.click();
         } catch (error) {
@@ -65,7 +63,7 @@ const AppointmentHistoryReport = () => {
                             <table className="min-w-full bg-white dark:bg-[#121c2c]">
                                 <thead>
                                     <tr>
-                                        <th className="py-2 px-4 border-b">Staff Name</th>
+                                        <th className="py-2 px-4 border-b">Customer Name</th>
                                         <th className="py-2 px-4 border-b">Mobile Number</th>
                                         <th className="py-2 px-4 border-b">In Time</th>
                                         <th className="py-2 px-4 border-b">Out Time</th>

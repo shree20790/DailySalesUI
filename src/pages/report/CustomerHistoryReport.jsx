@@ -1,18 +1,16 @@
 import React, { useState } from "react";
-import axios from "axios";
+import customerHistoryService from "../../services/CustomerReport/customerService";
 
 const CustomerHistoryReport = () => {
     const [createDate, setCreateDate] = useState("");
     const [data, setData] = useState([]);
-    const [downloadUrl, setDownloadUrl] = useState("");
 
     const handleDateChange = async (e) => {
         const selectedDate = e.target.value;
         setCreateDate(selectedDate);
-        setDownloadUrl(`https://dailysales.skylynxtech.com:8082/excelDownload?reportType=CustomerHistory&createDate=${selectedDate}`);
 
         try {
-            const response = await axios.get(`https://dailysales.skylynxtech.com:8082/api/CustomerHistory/getCustomerHistoryByDate?reportType=customerHistory&createDate=${selectedDate}`);
+            const response = await customerHistoryService.getCustomerHistoryByDate(selectedDate);
             if (response.data.isSuccess) {
                 setData(response.data.output);
             } else {
@@ -27,11 +25,11 @@ const CustomerHistoryReport = () => {
 
     const handleDownload = async () => {
         try {
-            const response = await axios.get(downloadUrl, { responseType: 'blob' });
+            const response = await customerHistoryService.downloadCustomerHistoryReport(createDate);
             const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
+            const link = document.createElement("a");
             link.href = url;
-            link.setAttribute('download', `CustomerHistoryReport_${createDate}.xlsx`);
+            link.setAttribute("download", `CustomerHistoryReport_${createDate}.xlsx`);
             document.body.appendChild(link);
             link.click();
         } catch (error) {
@@ -90,10 +88,7 @@ const CustomerHistoryReport = () => {
                     )}
 
                     {createDate && data.length > 0 && (
-                        <button
-                            className="btn btn-primary w-full sm:w-auto"
-                            onClick={handleDownload}
-                        >
+                        <button className="btn btn-primary w-full sm:w-auto" onClick={handleDownload}>
                             Download Report
                         </button>
                     )}
