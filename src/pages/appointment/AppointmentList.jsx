@@ -3,7 +3,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { FaSearch, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import debounce from "lodash.debounce";
 import Select from 'react-select';
-import staffService from "../../services/Staff/staffService";
+import staffService from "../../services/Staff/AppointmentService";
 import AlertService from "../../utils/AlertService";
 import IconPlus from "../../components/Icon/IconPlus";
 import IconTrashLines from "../../components/Icon/IconTrashLines";
@@ -57,7 +57,7 @@ const StaffList = () => {
     });
     const [refresh, setRefresh] = useState(false);
     const [staffNames, setStaffNames] = useState([]);
-
+    const [suggestedMobileNumbers, setSuggestedMobileNumbers] = useState([]);
     // Fetch staff data
     useEffect(() => {
         const fetchStaffs = async () => {
@@ -114,7 +114,7 @@ const StaffList = () => {
     // Handle delete staff
     const handleDelete = async (id) => {
         const confirmDelete = await AlertService.confirm({
-            message: "Are you sure you want to delete this staff?",
+            message: "Are you sure you want to delete this Appointment?",
         });
 
         if (!confirmDelete.isConfirmed) return;
@@ -162,10 +162,21 @@ const StaffList = () => {
         });
     };
 
-    // Handle input change
     const handleInputChange = (e) => {
         const value = e.target.type === "checkbox" ? e.target.checked : e.target.value;
         setEditedStaff({ ...editedStaff, [e.target.name]: value });
+    
+        if (e.target.name === "mobileNumber") {
+            const inputValue = e.target.value;
+            if (inputValue.length >= 2) {
+                const suggestions = staffNames
+                    .filter(staff => staff.mobileNumber.startsWith(inputValue))
+                    .map(staff => staff.mobileNumber);
+                setSuggestedMobileNumbers(suggestions);
+            } else {
+                setSuggestedMobileNumbers([]);
+            }
+        }
     };
 
     // Handle select change
@@ -175,7 +186,7 @@ const StaffList = () => {
             ...editedStaff, 
             customerId: selectedOption.value,
             staffName: selectedOption,
-            mobileNumber: selectedStaff ? selectedStaff.mobileNumber : ""
+
         });
     };
 
@@ -294,12 +305,12 @@ const StaffList = () => {
         <div className="flex flex-col gap-5 relative sm:h-[calc(100vh_-_150px)] h-full">
             {/* Overlay for modal */}
             <div
-                className={`overlay bg-black/60 w/full h/full rounded-md absolute ${addTaskModal ? "block" : "hidden"}`}
+                className={`overlay bg-black/60 w-full h/full rounded-md absolute ${addTaskModal ? "block" : "hidden"}`}
                 onClick={() => setAddTaskModal(!addTaskModal)}
             ></div>
 
             {/* Main content */}
-            <div className="bg-white dark:bg-[#121c2c] rounded-lg shadow w/full flex-grow">
+            <div className="bg-white dark:bg-[#121c2c] rounded-lg shadow w-full flex-grow">
                 {/* Header */}
                 <div className="flex flex-wrap items-center justify-between p-4">
                     <h3 className="text-lg font-semibold ltr:ml-3 rtl:mr-3">Appointment List</h3>
@@ -318,7 +329,7 @@ const StaffList = () => {
                                 }}
                             >
                                 <IconPlus className="ltr:mr-2 rtl:ml-2 shrink-0" />
-                                Add New Appointment
+                                Add Appointment
                             </button>
                         </div>
                         <div className="flex items-center border-gray-300 rounded bg-gray-100 dark:bg-[#1b2e4b] p-2 w-50">
@@ -326,7 +337,7 @@ const StaffList = () => {
                             <input
                                 type="text"
                                 placeholder="Search..."
-                                className="bg-transparent border-none focus:outline-none ml-2 w/full text-gray-700"
+                                 className="bg-transparent border-none focus:outline-none ml-2 w-full text-gray-700"
                                 onChange={handleSearch}
                             />
                         </div>
@@ -335,16 +346,16 @@ const StaffList = () => {
 
                 {/* Table */}
                 <div className="bg-white dark:bg-[#121c2c] rounded-lg shadow overflow-x-auto p-4">
-                    <table className="table-responsive w/full border border-gray-200 dark:border-gray-700">
+                    <table className="table-responsive w-full border border-gray-200 dark:border-gray-700">
                         <thead>
                             <tr className="bg-gray-200 dark:bg-[#1b2e4b] text-gray-700 dark:text-white">
                                 <th className="p-2 text-center">ID</th>
-                                <th className="p-2 text-center">Staff Name</th>
+                                <th className="p-2 text-center">Customer Name</th>
                                 <th className="p-2 text-center">Mobile Number</th>
-                                <th className="p-2 text-center">Today's Date</th>
+                                <th className="p-2 text-center"> Date</th>
                                 <th className="p-2 text-center">In Time</th>
                                 <th className="p-2 text-center">Out Time</th>
-                                <th className="p-2 text-center">Staff Type</th>
+                                <th className="p-2 text-center">Staff Name</th>
                                 <th className="p-2 text-center">Amount</th>
                                 <th className="p-2 text-center">Tip Amount</th>
                                 <th className="p-2 text-center">Pay Type</th>
@@ -492,7 +503,7 @@ const StaffList = () => {
                                         {editModalOpen ? "Edit Appointment" : "Add Appointment"}
                                     </div>
                                     <div className="p-5">
-                                        <form onSubmit={editModalOpen ? handleUpdate : handleCreateStaff}>
+                                    <form onSubmit={editModalOpen ? handleUpdate : handleCreateStaff}>
                                             <div className="grid grid-cols-3 gap-5 mb-6">
                                                 <div>
                                                     <label htmlFor="staffName" className="block font-medium text-gray-700">
@@ -505,7 +516,7 @@ const StaffList = () => {
                                                       value={editedStaff.staffName}
                                                       onChange={handleSelectChange}
                                                       options={staffNames.map(staff => ({ value: staff.id, label: staff.customerName }))}
-                                                      className="basic-single w/full"
+                                                      className="basic-single w-full"
                                                       classNamePrefix="select"
                                                       isClearable
                                                       isSearchable
@@ -518,22 +529,39 @@ const StaffList = () => {
                                                     <label htmlFor="mobileNumber" className="block font-medium text-gray-700">
                                                         Mobile Number
                                                     </label>
-                                                    <input
-                                                        type="text"
-                                                        id="mobileNumber"
-                                                        name="mobileNumber"
-                                                        value={editedStaff.mobileNumber || ""}
-                                                        onChange={(e) => {
+                                                   <input
+                                                     type="text"
+                                                     id="mobileNumber"
+                                                     name="mobileNumber"
+                                                     styles={SelectStyles}
+                                                     value={editedStaff.mobileNumber || ""}
+                                                      onChange={(e) => {
                                                             const value = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
                                                             if (value.length <= 10) {
                                                                 handleInputChange({ target: { name: "mobileNumber", value } });
                                                             }
                                                         }}
-                                                        className="form-input w-full"
-                                                        required
-                                                        placeholder="Mobile Number"
-                                                        maxLength="10" // Limit the input to 10 characters
+                                                     className="form-input w-full"
+                                                     required
+                                                     placeholder="Search..."
+                                                     maxLength="10"
                                                     />
+                                                    {suggestedMobileNumbers.length > 0 && (
+                                                      <ul className="mt-1 border border-gray-300 rounded bg-white">
+                                                     {suggestedMobileNumbers.map((number, index) => (
+                                                     <li
+                                                      key={index}
+                                                       className="p-2 hover:bg-gray-100 cursor-pointer"
+                                                     onClick={() => {
+                                                     setEditedStaff({ ...editedStaff, mobileNumber: number });
+                                                     setSuggestedMobileNumbers([]);
+                                                      }}
+                                                     >
+                                                     {number}
+                                                    </li>
+                                                    ))}
+                                                    </ul>
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <label htmlFor="todaysDate" className="block font-medium text-gray-700">
@@ -584,7 +612,7 @@ const StaffList = () => {
                                                 </div>
                                                 <div>
                                                     <label htmlFor="staffType" className="block font-medium text-gray-700">
-                                                        Staff Type
+                                                        Staff Name
                                                     </label>
                                                     <input
                                                         type="text"
@@ -594,7 +622,7 @@ const StaffList = () => {
                                                         onChange={handleInputChange}
                                                         className="form-input w-full"
                                                         required
-                                                        placeholder="Staff Type"
+                                                        placeholder="Staff Name"
                                                     />
                                                 </div>
                                             </div>
@@ -678,7 +706,7 @@ const StaffList = () => {
                                                     {editModalOpen ? "Update" : "Add"}
                                                 </button>
                                             </div>
-                                        </form>
+                                        </form> 
                                     </div>
                                 </Dialog.Panel>
                             </Transition.Child>

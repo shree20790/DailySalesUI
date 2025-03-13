@@ -25,7 +25,7 @@ const Index = lazy(() => import('../pages/index'));
 // const AddNewTask = lazy(() => import('../pages/Task/AddNewTask'));
 const ClientHistory = lazy(() => import('../pages/clienthistory/ClientHistory')); // Import ClientHistory
 const ClientList = lazy(() => import('../pages/client/ClientList')); // Import ClientList
-const StaffList = lazy(()  => import('../pages/staff/StaffList'));
+const AppointmentList = lazy(()  => import('../pages/appointment/AppointmentList'));
 const CustomerHistoryReport = lazy(() => import('../pages/report/CustomerHistoryReport')); // Import CustomerHistoryReport
 const AppointmentHistoryReport = lazy(() => import('../pages/report/AppointmentHistoryReport')); // Import AppointmentHistoryReport
 const PayTypeHistory = lazy(() => import('../pages/report/PayTypeHistory'));
@@ -247,8 +247,8 @@ const routes = [
         element: <ClientList />,
     },
     {
-        path: '/staffList',
-        element: <StaffList/>
+        path: '/Appointment',
+        element: <AppointmentList />
     },
     // {
     //     path: '/index',

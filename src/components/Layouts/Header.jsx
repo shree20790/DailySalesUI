@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { toggleRTL, toggleTheme, toggleSidebar } from '../../app/themeConfigSlice';
 import { useTranslation } from 'react-i18next';
-import logo from "../../assets/final-logo.png";
+import logo from "../../assets/dailysaleslogo.png";
 import i18next from 'i18next';
 import Dropdown from '../Dropdown';
 import IconMenu from '../Icon/IconMenu';
@@ -154,10 +154,10 @@ const getInitials = (firstName, lastName) => {
             <div className="shadow-sm">
                 <div className="relative bg-white flex w-full items-center px-5 py-2.5 dark:bg-black">
                     <div className="horizontal-logo flex lg:hidden justify-between items-center ltr:mr-2 rtl:ml-2">
-                        <Link to="/" className="main-logo flex items-center shrink-0">
-                            {/* Replace the image with the text "Daily Sales" */}
-                            <span className="text-xl font-semibold">Daily Sales</span>
-                        </Link>
+                        <NavLink to="/" className="main-logo flex items-center shrink-0">
+                          {/* Replace the text with the imsge "Daily Sales" */}
+                          {themeConfig.menu=='collapsible-vertical' ? <img className="w-8 ml-[5px] flex-none" src={logo} alt="logo" />:<img className="w-40 ml-[5px] flex-none" src={logo} alt="logo" />}
+                        </NavLink>
                         <button
                             type="button"
                             className="collapse-icon flex-none dark:text-[#d0d2d6] hover:text-primary dark:hover:text-primary flex lg:hidden ltr:ml-2 rtl:mr-2 p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:bg-white-light/90 dark:hover:bg-dark/60"

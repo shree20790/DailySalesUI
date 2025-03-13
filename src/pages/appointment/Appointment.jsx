@@ -2,7 +2,7 @@ import React from 'react';
 import IconTrashLines from '../../components/Icon/IconTrashLines';
 import IconPlus from '../../components/Icon/IconPlus';
 import { Link } from 'react-router-dom';
-import StaffInfo from './StaffList';
+import StaffInfo from './AppointmentList';
 
 const Staff = () => {
   return (
