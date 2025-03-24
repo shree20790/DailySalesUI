@@ -31,7 +31,7 @@ const uploadPhoto = async (file) => {
     formData.append('FileName', file.name);
 
     try {
-        const response = await axios.post('https://dailysales.skylynxtech.com:8082/api/upload', formData, {
+        const response = await axios.post('https://dailysalesapi.skylynxclass.in/api/upload', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },

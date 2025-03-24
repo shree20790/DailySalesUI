@@ -7,7 +7,7 @@ import StaffInfo from './AppointmentList';
 const Staff = () => {
   return (
     <StaffInfo 
-        apiUrl="https://dailysales.skylynxtech.com:8082/api/StaffInfo/getPaginatedStaffInfos"
+        apiUrl="https://dailysalesapi.skylynxclass.in/api/StaffInfo/getPaginatedStaffInfos"
     />
   );
 };

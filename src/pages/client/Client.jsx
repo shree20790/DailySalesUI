@@ -7,7 +7,7 @@ import ClientInfo from './ClientList';
 const Client = () => {
   return (
     <ClientInfo 
-        apiUrl="https://dailysales.skylynxtech.com:8082/api/CustomerProfile/getPaginatedCustomerProfiles"
+        apiUrl="https://dailysalesapi.skylynxclass.in/CustomerProfile/getPaginatedCustomerProfiles"
     />
   );
 };

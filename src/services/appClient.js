@@ -1,7 +1,7 @@
 import axios from "axios";
 import store from "../app/store";
 import { showLoader,hideLoader } from "../app/loaderSlice";// Base URL for all API calls
-const BASE_URL = "https://dailysales.skylynxtech.com:8082/api/";
+const BASE_URL = "https://dailysalesapi.skylynxclass.in/api/";
 
 // Create an Axios instance
 const apiClient = axios.create({

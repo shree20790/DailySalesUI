@@ -5,7 +5,7 @@ import CustomerListInfo from './CustomerListInfo';
 const CustomerList = () => {
   return (
     <CustomerListInfo
-        apiUrl="https://finverse.finoracles.com:8082/api/CustomerInfo/getPaginatedCustomerInfos"
+        apiUrl="https://dailysalesapi.skylynxclass.in/api/CustomerInfo/getPaginatedCustomerInfos"
     />
   );
 };

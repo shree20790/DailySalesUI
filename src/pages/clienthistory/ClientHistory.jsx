@@ -7,7 +7,7 @@ import ClientHistoryInfo from './ClientHistoryInfo';
 const ClientHistory = () => {
   return (
     <ClientHistoryInfo 
-      apiUrl="https://dailysales.skylynxtech.com:8082/api/CustomerHistory/getPaginatedCustomerHistorys"
+      apiUrl="https://dailysalesapi.skylynxclass.in/api/CustomerHistory/getPaginatedCustomerHistorys"
     />
   );
 };

@@ -9,7 +9,7 @@ const appointmentHistoryService = {
 
   downloadAppointmentHistoryReport: (date) =>
     axios.get(
-      `https://dailysales.skylynxtech.com:8082/excelDownload?reportType=StaffInfoHistory&createDate=${date}`,
+      `https://dailysalesapi.skylynxclass.in/excelDownload?reportType=StaffInfoHistory&createDate=${date}`,
       { responseType: "blob" }
     ),
 };
