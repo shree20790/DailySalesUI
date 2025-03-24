@@ -131,7 +131,7 @@ const handleEdit = (client) => {
     console.log(client.photo)
     const str=client.photo.slice(8)
     
-    client.photo = `https://dailysales.skylynxtech.com:8082/api/upload/download?folderName=Profile&fileName=${str}`;
+    client.photo = `https://dailysalesapi.skylynxclass.in/api/upload/download?folderName=Profile&fileName=${str}`;
     console.log(client.photo)
 
     //let abc=`aprofile\\`
