@@ -86,7 +86,7 @@ const StaffList = () => {
     useEffect(() => {
         const fetchStaffNames = async () => {
             try {
-                const response = await fetch("https://dailysales.skylynxtech.com:8082/api/CustomerProfile/getAllCustomerProfiles?includeInActive=true");
+                const response = await fetch("https://dailysalesapi.skylynxclass.in/api/CustomerProfile/getAllCustomerProfiles?includeInActive=true");
                 const data = await response.json();
                 if (data.isSuccess && Array.isArray(data.output)) {
                     setStaffNames(data.output.map(staff => ({

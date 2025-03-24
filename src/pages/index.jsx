@@ -35,7 +35,7 @@ const Index = ({ apiUrl }) => {
   // Fetch Payment Data (from MasterForm)
   const fetchPaymentData = async () => {
     try {
-      const api = 'https://dailysales.skylynxtech.com:8082';
+      const api = 'https://dailysalesapi.skylynxclass.in';
       const response = await axios.get(api + "/api/StaffInfo/getAllStaffInfos?includeInActive=true");
 
       const staffData = response.data.output || [];
@@ -73,7 +73,7 @@ const Index = ({ apiUrl }) => {
   // Fetch Total Appointments
   const fetchTotalAppointments = async () => {
     try {
-      const api = 'https://dailysales.skylynxtech.com:8082';
+      const api = 'https://dailysalesapi.skylynxclass.in';
       const response = await axios.get(api + "/api/StaffInfo/getAllStaffInfos?includeInActive=true");
 
       const staffData = response.data.output || [];
@@ -96,7 +96,7 @@ const Index = ({ apiUrl }) => {
   // Fetch Total Clients
   const fetchTotalClients = async () => {
     try {
-      const api = 'https://dailysales.skylynxtech.com:8082';
+      const api = 'https://dailysalesapi.skylynxclass.in';
       const response = await axios.get(api + "/api/CustomerProfile/getAllCustomerProfiles?includeInActive=true");
 
       const clientData = response.data.output || [];

@@ -5,7 +5,7 @@ import UserListinfo from './UserListInfo';
 const UserList = () => {
   return (
     <UserListinfo
-        apiUrl="https://finverse.finoracles.com:8082/api/User/getPaginatedUsers"
+        apiUrl="https://dailysalesapi.skylynxclass.in/api/User/getPaginatedUsers"
     />
   );
 };

@@ -3,7 +3,7 @@ import MenuRoleMappingListInfo from './MenuRoleMappingListInfo';
 const MenuRoleMappingList = () => {
   return (
     <MenuRoleMappingListInfo
-        apiUrl="https://dailysales.skylynxtech.com:8082/api/MenuRoleMapping/getPaginatedMenuRoleMappings"/>
+        apiUrl="https://dailysalesapi.skylynxclass.in/api/MenuRoleMapping/getPaginatedMenuRoleMappings"/>
   );
 };
 

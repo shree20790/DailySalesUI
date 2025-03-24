@@ -9,7 +9,7 @@ const customerHistoryService = {
 
   downloadCustomerHistoryReport: (createDate) =>
     axios.get(
-      `https://dailysales.skylynxtech.com:8082/excelDownload?reportType=CustomerHistory&createDate=${createDate}`,
+      `https://dailysalesapi.skylynxclass.in/excelDownload?reportType=CustomerHistory&createDate=${createDate}`,
       { responseType: "blob" }
     ),
 };
