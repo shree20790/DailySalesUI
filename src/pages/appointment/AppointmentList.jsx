@@ -9,6 +9,8 @@ import IconPlus from "../../components/Icon/IconPlus";
 import IconTrashLines from "../../components/Icon/IconTrashLines";
 import IconEdit from "../../components/Icon/IconEdit";
 import SelectStyles from "../../utils/SelectStyles";
+import ClientList from "../client/ClientList";
+import clientService from "../../services/Client/clientservice";
 
 // Utility function to format date to dd/mm/yyyy
 const formatDate = (date) => {
@@ -26,21 +28,28 @@ const toISODate = (dateStr) => {
 
 const StaffList = () => {
     // State variables
+    const [data, setData] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [totalRows, setTotalRows] = useState(0);
+    const [sortField, setSortField] = useState('Id');
+    const [sortDirection, setSortDirection] = useState('desc');
     const [staffs, setStaffs] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [totalRows, setTotalRows] = useState(0);
+
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [addTaskModal, setAddTaskModal] = useState(false);
+    const [isShowTaskMenu, setIsShowTaskMenu] = useState(false);
     const paymentOptions = [
         { value: 'GPay', label: 'GPay' },
         { value: 'Card', label: 'Card' },
         { value: 'Cash', label: 'Cash' }
     ];
     const [editedStaff, setEditedStaff] = useState({
+
         customerId: 0,
         staffName: "",
         mobileNumber: "",
@@ -58,37 +67,59 @@ const StaffList = () => {
     const [refresh, setRefresh] = useState(false);
     const [staffNames, setStaffNames] = useState([]);
     const [suggestedMobileNumbers, setSuggestedMobileNumbers] = useState([]);
-    // Fetch staff data
-    useEffect(() => {
-        const fetchStaffs = async () => {
-            setLoading(true);
-            try {
-                const response = await staffService.getAllStaffs();
-                if (!response.data || !Array.isArray(response.data.output)) {
-                    throw new Error("Invalid data format: Expected an array.");
-                }
-                setStaffs(response.data.output.map(staff => ({
-                    ...staff,
-                    todaysDate: staff.todaysDate ? formatDate(new Date(staff.todaysDate)) : formatDate(new Date()) // Ensure date is formatted
-                })));
-                setTotalRows(response.data.output.length);
-            } catch (err) {
-                setError(err.message || "Error loading staff data");
-            } finally {
-                setLoading(false);
-            }
-        };
 
-        fetchStaffs();
-    }, [currentPage, rowsPerPage, searchQuery, refresh]);
+
+        
+    const handleSearch = debounce((e) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(1);
+      }, 500);
+    
+      const handlePageChange = (direction) => {
+        if (direction === 'prev' && currentPage > 1) {
+          setCurrentPage((prev) => prev - 1);
+        } else if (direction === 'next' && currentPage * rowsPerPage < totalRows) {
+          setCurrentPage((prev) => prev + 1);
+        }
+      };
+  
+      const selectedColumns = ["id", "customerName", "customerMobileNumber", "todaysDate", "staffName", "mobileNumber", "inTime", "outTime", "isActive" ];
+    // Fetch staff data
+    useEffect(() => { 
+
+        const fetchData = async () => {
+          setLoading(true);
+          try {
+            const response = await staffService.getPaginatedStaffs({
+              page: currentPage,
+              pageSize: rowsPerPage,
+              searchTerm,
+              sortDirection,
+              sortField,
+            });
+      
+            if (response.data.isSuccess) {
+      
+              setData(response.data.output.result || []); // Ensure it's an array
+              setTotalRows(response.data.output.rowCount || 0);
+            }
+          } catch (error) {
+            console.error("Error fetching data:", error);
+          }
+          setLoading(false);
+        };
+      
+        fetchData();
+      }, [currentPage, rowsPerPage, searchTerm, sortField, sortDirection, refresh]);
 
     // Fetch staff names for searchable select
     useEffect(() => {
         const fetchStaffNames = async () => {
+  
             try {
-                const response = await fetch("https://dailysalesapi.skylynxclass.in/api/CustomerProfile/getAllCustomerProfiles?includeInActive=true");
-                const data = await response.json();
-                if (data.isSuccess && Array.isArray(data.output)) {
+                const response = await clientService.getAllClients();
+                const data = await response.data;
+                if (data.isSuccess == true) {
                     setStaffNames(data.output.map(staff => ({
                         id: staff.id,
                         customerName: staff.customerName,
@@ -105,11 +136,6 @@ const StaffList = () => {
         fetchStaffNames();
     }, []);
 
-    // Handle search with debounce
-    const handleSearch = debounce((e) => {
-        setSearchQuery(e.target.value);
-        setCurrentPage(1);
-    }, 500);
 
     // Handle delete staff
     const handleDelete = async (id) => {
@@ -130,15 +156,16 @@ const StaffList = () => {
     };
 
     // Handle edit staff
-    const handleEdit = (staff) => {
-        const selectedStaffName = staffNames.find(item => item.id === staff.customerId) || { id: staff.customerId, customerName: staff.staffName, mobileNumber: staff.mobileNumber };
+    const handleEditClick = (staff) => {
+
+        console.log(staff)
+        // const selectedStaffName = staffNames.find(item => item.id === staff.id) || { id: staff.id, customerName: staff.customerName, mobileNumber: staff.mobileNumber };
         setEditedStaff({
             ...staff,
-            staffName: { value: selectedStaffName.id, label: selectedStaffName.customerName },
-            customerId: selectedStaffName.id,
-            mobileNumber: selectedStaffName.mobileNumber,
-            todaysDate: staff.todaysDate ? staff.todaysDate : formatDate(new Date()) // Ensure date is formatted
-        });
+            todaysDate: formatDate(new Date()), // Ensure date is formatted
+          });
+       
+        setAddTaskModal(true);
         setEditModalOpen(true);
     };
 
@@ -163,7 +190,8 @@ const StaffList = () => {
     };
 
     const handleInputChange = (e) => {
-        const value = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+
+       const value = e.target.type === "checkbox" ? e.target.checked : e.target.value;
         setEditedStaff({ ...editedStaff, [e.target.name]: value });
     
         if (e.target.name === "mobileNumber") {
@@ -181,6 +209,7 @@ const StaffList = () => {
 
     // Handle select change
     const handleSelectChange = (selectedOption, actionMeta) => {
+
         const selectedStaff = staffNames.find(staff => staff.id === selectedOption.value);
         setEditedStaff({ 
             ...editedStaff, 
@@ -201,7 +230,7 @@ const StaffList = () => {
             !editedStaff.todaysDate ||
             !editedStaff.inTime ||
             !editedStaff.outTime ||
-            !editedStaff.staffType ||
+          //  !editedStaff.staffType ||
             !editedStaff.amount ||
             !editedStaff.sttafTipAmount ||
             !editedStaff.amountPayType
@@ -213,9 +242,10 @@ const StaffList = () => {
         try {
             const updatedStaffData = {
                 customerId: editedStaff.customerId,
-                staffName: editedStaff.staffName.label,  // Extract the label for display
+                staffName: editedStaff.staffName,  // Extract the label for display
                 mobileNumber: editedStaff.mobileNumber,
-                todaysDate: toISODate(editedStaff.todaysDate),  // Convert to ISO format for backend
+                //todaysDate: formatDate(new Date(editedStaff.todaysDate)),
+               todaysDate: toISODate(editedStaff.todaysDate),  // Convert to ISO format for backend
                 inTime: editedStaff.inTime,
                 outTime: editedStaff.outTime,
                 staffType: editedStaff.staffType,
@@ -257,20 +287,21 @@ const StaffList = () => {
 
     // Handle create staff
     const handleCreateStaff = async (e) => {
+
         e.preventDefault();
         try {
             const response = await staffService.createStaff({
                 ...editedStaff,
-                staffName: editedStaff.staffName.label, // Send the label to the backend
+                //staffName: editedStaff.staffName.label, // Send the label to the backend
                 todaysDate: toISODate(editedStaff.todaysDate) // Convert to ISO format for backend
             });
 
             setStaffs((prevStaffs) => [
-                { ...response.data.output, staffName: editedStaff.staffName.label }, // Update with the label
+                { ...response.data.output }, // Update with the label
                 ...prevStaffs,
             ]);
 
-            setTotalRows((prevTotalRows) => prevTotalRows + 1);
+            //setTotalRows((prevTotalRows) => prevTotalRows + 1);
             AlertService.success("Staff added successfully!");
             setRefresh((prev) => !prev);
             handleModalClose();
@@ -280,13 +311,7 @@ const StaffList = () => {
     };
 
     // Handle pagination
-    const handlePageChange = (direction) => {
-        if (direction === "prev" && currentPage > 1) {
-            setCurrentPage((prev) => prev - 1);
-        } else if (direction === "next" && currentPage * rowsPerPage < totalRows) {
-            setCurrentPage((prev) => prev + 1);
-        }
-    };
+
 
     // Sorting staff by ID
     const sortedStaffs = [...staffs].sort((a, b) => b.id - a.id);
@@ -303,162 +328,100 @@ const StaffList = () => {
 
     return (
         <div className="flex flex-col gap-5 relative sm:h-[calc(100vh_-_150px)] h-full">
-            {/* Overlay for modal */}
-            <div
-                className={`overlay bg-black/60 w-full h/full rounded-md absolute ${addTaskModal ? "block" : "hidden"}`}
-                onClick={() => setAddTaskModal(!addTaskModal)}
-            ></div>
-
-            {/* Main content */}
-            <div className="bg-white dark:bg-[#121c2c] rounded-lg shadow w-full flex-grow">
-                {/* Header */}
-                <div className="flex flex-wrap items-center justify-between p-4">
-                    <h3 className="text-lg font-semibold ltr:ml-3 rtl:mr-3">Appointment List</h3>
-                    <div className="flex items-center space-x-4">
-                        <div>
-                            <button
-                                className="btn btn-primary w-full"
-                                type="button"
-                                onClick={() => {
-                                    setEditedStaff({ 
-                                        ...editedStaff, 
-                                        todaysDate: formatDate(new Date()),
-                                        inTime: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) // Set current time
-                                    });
-                                    setAddTaskModal(true);
-                                }}
-                            >
-                                <IconPlus className="ltr:mr-2 rtl:ml-2 shrink-0" />
-                                Add Appointment
-                            </button>
-                        </div>
-                        <div className="flex items-center border-gray-300 rounded bg-gray-100 dark:bg-[#1b2e4b] p-2 w-50">
-                            <FaSearch className="text-gray-400 text-lg" />
-                            <input
-                                type="text"
-                                placeholder="Search..."
-                                 className="bg-transparent border-none focus:outline-none ml-2 w-full text-gray-700"
-                                onChange={handleSearch}
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Table */}
-                <div className="bg-white dark:bg-[#121c2c] rounded-lg shadow overflow-x-auto p-4">
-                    <table className="table-responsive w-full border border-gray-200 dark:border-gray-700">
-                        <thead>
-                            <tr className="bg-gray-200 dark:bg-[#1b2e4b] text-gray-700 dark:text-white">
-                                <th className="p-2 text-center">ID</th>
-                                <th className="p-2 text-center">Customer Name</th>
-                                <th className="p-2 text-center">Mobile Number</th>
-                                <th className="p-2 text-center"> Date</th>
-                                <th className="p-2 text-center">In Time</th>
-                                <th className="p-2 text-center">Out Time</th>
-                                <th className="p-2 text-center">Staff Name</th>
-                                <th className="p-2 text-center">Amount</th>
-                                <th className="p-2 text-center">Tip Amount</th>
-                                <th className="p-2 text-center">Pay Type</th>
-                                <th className="p-2 text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {loading ? (
-                                <tr>
-                                    <td colSpan="11" className="text-center p-4">
-                                        Loading...
-                                    </td>
-                                </tr>
-                            ) : error ? (
-                                <tr>
-                                    <td colSpan="11" className="text-center p-4 text-red-500">
-                                        {error}
-                                    </td>
-                                </tr>
-                            ) : displayedStaffs.length > 0 ? (
-                                displayedStaffs.map((staff) => (
-                                    <tr
-                                        key={staff.id}
-                                        className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a202c] text-gray-900 dark:text-white"
-                                    >
-                                        <td className="p-2 text-center">{staff.id}</td>
-                                        <td className="p-2 text-center">{staff.staffName}</td>
-                                        <td className="p-2 text-center">{staff.mobileNumber}</td>
-                                        <td className="p-2 text-center">
-                                            {staff.todaysDate}
-                                        </td>
-                                        <td className="p-2 text-center">{staff.inTime}</td>
-                                        <td className="p-2 text-center">{staff.outTime}</td>
-                                        <td className="p-2 text-center">{staff.staffType}</td>
-                                        <td className="p-2 text-center">{staff.amount}</td>
-                                        <td className="p-2 text-center">{staff.sttafTipAmount}</td>
-                                        <td className="p-2 text-center">{staff.amountPayType}</td>
-                                        <td className="p-2 flex justify-center gap-3">
-                                            <button
-                                                className="text-blue-500 cursor-pointer"
-                                                onClick={() => handleEdit(staff)}
-                                            >
-                                                <IconEdit />
-                                            </button>
-                                            <button
-                                                className="text-red-500 cursor-pointer"
-                                                onClick={() => handleDelete(staff.id)}
-                                            >
-                                                <IconTrashLines />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="11" className="text-center p-4">
-                                        No staff available.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* Pagination */}
-                <div className="flex flex-wrap items-center justify-between p-4">
-                    <div className="flex items-center space-x-4">
-                        <span className="text-gray-700 font-medium">Rows Per Page</span>
-                        <select
-                            value={rowsPerPage}
-                            onChange={(e) => setRowsPerPage(Number(e.target.value))}
-                            className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-1 focus:ring-gray-500 cursor-pointer"
-                        >
-                            {[10, 20, 50, 100].map((size) => (
-                                <option key={size} value={size}>
-                                    {size}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="flex items-center space-x-4">
-                        <span>
-                            {(currentPage - 1) * rowsPerPage + 1}-
-                            {Math.min(currentPage * rowsPerPage, totalRows)} of {totalRows}
-                        </span>
-                        <button
-                            onClick={() => handlePageChange("prev")}
-                            disabled={currentPage === 1}
-                            className={`p-2 rounded ${currentPage === 1 ? "text-gray-400 cursor-not-allowed" : "text-gray-700"}`}
-                        >
-                            <FaChevronLeft />
-                        </button>
-                        <button
-                            onClick={() => handlePageChange("next")}
-                            disabled={currentPage * rowsPerPage >= totalRows}
-                            className={`p-2 rounded ${currentPage * rowsPerPage >= totalRows ? "text-gray-400 cursor-not-allowed" : "text-gray-700"}`}
-                        >
-                            <FaChevronRight />
-                        </button>
-                    </div>
-                </div>
+                 <div
+        className={`overlay bg-black/60 w-full h-full rounded-md absolute hidden ${
+          isShowTaskMenu && "!block xl:!hidden"
+        }`}
+        onClick={() => setIsShowTaskMenu(!isShowTaskMenu)}
+      ></div>
+      <div className="bg-white dark:bg-[#121c2c] rounded-lg shadow w-full flex-grow">
+        <div className="flex flex-wrap items-center justify-between p-4">
+          <h3 className="text-lg font-semibold ltr:ml-3 rtl:mr-3">Appointment List</h3>
+          <div className="flex items-center space-x-4">
+            <div>
+              <button
+                className="btn btn-primary w-full"
+                type="button"
+                onClick={() => setAddTaskModal(true)}
+              >
+                <IconPlus className="ltr:mr-2 rtl:ml-2 shrink-0" />
+                Add New Appointment
+              </button>
             </div>
+            <div className="flex items-center border-gray-300 rounded bg-gray-100 dark:bg-[#1b2e4b] p-2 w-50">
+              <FaSearch className="text-gray-400 text-lg" />
+              <input
+                type="text"
+                placeholder="Search..."
+                className="bg-transparent border-none focus:outline-none ml-2 w-full text-gray-700"
+                onChange={handleSearch}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-[#121c2c] rounded-lg shadow overflow-x-auto p-4 w-full">
+          <table className="table-responsive mb-5 w-full border border-gray-200 dark:border-gray-700">
+            <thead>
+              <tr className="bg-gray-200 dark:bg-[#1b2e4b] text-gray-700 dark:text-white">
+                {selectedColumns.map((col) => (
+                  <th key={col} className="p-2 capitalize text-center">
+                    {col}
+                  </th>
+                ))}
+                <th className="p-2 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan={selectedColumns.length + 1}
+                    className="text-center p-4"
+                  >
+                    Loading...
+                  </td>
+                </tr>
+              ) : data.length > 0 ? (
+                data.map((item, index) => (
+                  <tr
+                    key={index}
+                    className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a202c] text-gray-900 dark:text-white"
+                  >
+                    {selectedColumns.map((col) => (
+                      <td key={col} className="p-2 text-center">
+                        {col === "role"
+                          ? roles.find((role) => role.id === item.role)
+                              ?.roleName || "N/A"
+                          : item[col] !== undefined && item[col] !== null
+                          ? item[col].toString()
+                          : "N/A"}
+                      </td>
+                    ))}
+                    <td className="p-2 flex justify-center gap-3 items-center">
+                      <button onClick={() => handleEditClick(item)}>
+                        <IconEdit className="text-blue-500 cursor-pointer" />
+                      </button>
+                      <button onClick={() => handleDeleteClick(item.id)}>
+                        <IconTrashLines className="text-red-500 cursor-pointer" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={selectedColumns.length + 1}
+                    className="text-center p-4"
+                  >
+                    No Data Available
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        </div>
 
             {/* Edit/Add Modal */}
             <Transition appear show={editModalOpen || addTaskModal} as={Fragment}>
@@ -506,14 +469,15 @@ const StaffList = () => {
                                     <form onSubmit={editModalOpen ? handleUpdate : handleCreateStaff}>
                                             <div className="grid grid-cols-3 gap-5 mb-6">
                                                 <div>
-                                                    <label htmlFor="staffName" className="block font-medium text-gray-700">
+                                                    <label htmlFor="customerId" className="block font-medium text-gray-700">
                                                         Customer Name
                                                     </label>
                                                     <Select
-                                                      id="staffName"
-                                                      name="staffName"
+                                                      id="customerId"
+                                                      name="customerId"
                                                       styles={SelectStyles}
-                                                      value={editedStaff.staffName}
+                                                     // value={editedStaff.id}
+                                                     value={{ label: editedStaff.customerName, value: editedStaff.customerId }}
                                                       onChange={handleSelectChange}
                                                       options={staffNames.map(staff => ({ value: staff.id, label: staff.customerName }))}
                                                       className="basic-single w-full"
@@ -611,14 +575,14 @@ const StaffList = () => {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label htmlFor="staffType" className="block font-medium text-gray-700">
+                                                    <label htmlFor="staffName" className="block font-medium text-gray-700">
                                                         Staff Name
                                                     </label>
                                                     <input
                                                         type="text"
-                                                        id="staffType"
-                                                        name="staffType"
-                                                        value={editedStaff.staffType || ""}
+                                                        id="staffName"
+                                                        name="staffName"
+                                                        value={editedStaff.staffName || ""}
                                                         onChange={handleInputChange}
                                                         className="form-input w-full"
                                                         required

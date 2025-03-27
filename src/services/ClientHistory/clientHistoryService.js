@@ -16,14 +16,8 @@ const ClientHistoryService = {
   deleteClientHistory: (id) =>
     apiService.delete(`/CustomerHistory/DeleteCustomerHistory/${id}`),
 
-  getPaginatedClientHistories: (page, limit) => 
-    apiService.post("/CustomerHistory/getPaginatedCustomerHistorys", {
-      "page": page,
-      "pageSize": limit,
-      "searchTerm": "",
-      "sortDirection": "desc",
-      "sortField": "id"
-    }),
+  getPaginatedClientHistories: (userData) => 
+    apiService.post("/CustomerHistory/getPaginatedCustomerHistorys", userData),
 
 };
 

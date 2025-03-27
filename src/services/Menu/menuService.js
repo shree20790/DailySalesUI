@@ -13,6 +13,8 @@ const menuService = {
   deleteMenu: (Id) => apiService.delete(`Menu/DeleteMenu/${Id}`),
 
   getPaginatedMenus: (page, size) => apiService.get("Menu/getPaginatedMenus", { page, size }),
+  
+  getRolewiseMenu: (id) => apiService.get(`MenuRoleMapping/GetRoleWiseMenuQuery/${id}`),
 };
 
 export default menuService;

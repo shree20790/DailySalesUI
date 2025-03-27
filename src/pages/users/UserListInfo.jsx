@@ -61,7 +61,9 @@ const UserListinfo = ({ apiUrl  }) => {
       const fetchData = async () => {
         setLoading(true);
         try {
-          const response = await apiService.post(apiUrl, {
+
+          
+          const response = await apiService.post(`${config.BaseUrl}/User/getPaginatedUsers`, {
             page: currentPage,
             pageSize: rowsPerPage,
             searchTerm,
