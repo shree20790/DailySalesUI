@@ -9,6 +9,7 @@ import appointment from "../assets/appointment.png";
 import { FaSearch, FaChevronRight, FaChevronLeft } from "react-icons/fa";
 import { getUserData } from "../utils/userData";
 import axios from "axios";
+import { config } from "../config";
 
 const Index = ({ apiUrl }) => {
   const [selected, setSelected] = useState("Dashboard");
@@ -35,9 +36,9 @@ const Index = ({ apiUrl }) => {
   // Fetch Payment Data (from MasterForm)
   const fetchPaymentData = async () => {
     try {
-      const api = 'https://dailysalesapi.skylynxclass.in';
-      const response = await axios.get(api + "/api/StaffInfo/getAllStaffInfos?includeInActive=true");
-
+    
+      const response = await axios.get(config.BaseUrl + "StaffInfo/getAllStaffInfos?includeInActive=true");
+      debugger;
       const staffData = response.data.output || [];
 
       // Get today's date in YYYY-MM-DD format
@@ -73,8 +74,8 @@ const Index = ({ apiUrl }) => {
   // Fetch Total Appointments
   const fetchTotalAppointments = async () => {
     try {
-      const api = 'https://dailysalesapi.skylynxclass.in';
-      const response = await axios.get(api + "/api/StaffInfo/getAllStaffInfos?includeInActive=true");
+      console.log(config.BaseUrl);
+      const response = await axios.get(config.BaseUrl + "StaffInfo/getAllStaffInfos?includeInActive=true");
 
       const staffData = response.data.output || [];
 
@@ -96,8 +97,7 @@ const Index = ({ apiUrl }) => {
   // Fetch Total Clients
   const fetchTotalClients = async () => {
     try {
-      const api = 'https://dailysalesapi.skylynxclass.in';
-      const response = await axios.get(api + "/api/CustomerProfile/getAllCustomerProfiles?includeInActive=true");
+      const response = await axios.get(config.BaseUrl + "CustomerProfile/getAllCustomerProfiles?includeInActive=true");
 
       const clientData = response.data.output || [];
 
@@ -125,14 +125,13 @@ const Index = ({ apiUrl }) => {
   useEffect(() => {
     const user = getUserData();
     console.log("User Data:", user); // Log the user data
-    if (user) {
-      console.log("User Role:", user.role); // Log the user role
-      if (user.role === 1) { // Assuming 1 represents ADMIN role
-        setIsAdmin(true);
-      } else {
-        setIsAdmin(false);
-      }
+    if (user != null) {
+      setIsAdmin(true);
+      console.log("User Role:", user.roleIds); // Log the user role
+      // Assuming 1 represents ADMIN role
+          
     } else {
+      setIsAdmin(false);
       console.log("User data is not defined");
     }
   }, []);

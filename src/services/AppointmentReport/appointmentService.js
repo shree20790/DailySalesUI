@@ -2,14 +2,15 @@ import apiService from "../appClient";
 import axios from "axios";
 
 const appointmentHistoryService = {
-  getAppointmentHistoryByDate: (date) =>
+  getAppointmentHistoryByDate: (startDate,endDate) =>
     apiService.get(
-      `StaffInfo/getStaffInfoByDate?reportType=staffinfohistory&createDate=${date}`
+      `StaffInfo/getStaffInfoByDate?reportType=staffinfohistory&StartDate=${startDate}&EndDate=${endDate}`
+
     ),
 
-  downloadAppointmentHistoryReport: (date) =>
+  downloadAppointmentHistoryReport: (startDate,endDate) =>
     axios.get(
-      `https://dailysalesapi.skylynxclass.in/excelDownload?reportType=StaffInfoHistory&createDate=${date}`,
+      `https://dailysalesapi.skylynxclass.in/excelDownload?reportType=StaffInfoHistory&StartDate=${startDate}&EndDate=${endDate}`,
       { responseType: "blob" }
     ),
 };

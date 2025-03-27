@@ -9,7 +9,7 @@ const payTypeService = {
 
   downloadPayTypeReport: (payType) =>
     axios.get(
-      `https://dailysalesapi.skylynxclass.in/excelDownload?reportType=PayTypeHistory&createDate=${payType}`,
+      `https://dailysalesapi.skylynxclass.in/excelDownload?reportType=PayTypeHistory&StartDate=${payType}`,
       { responseType: "blob" }
     ),
 };

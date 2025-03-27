@@ -13,8 +13,8 @@ const staffService = {
 
   deleteStaff: (Id) => apiService.delete(`StaffInfo/DeleteStaffInfo/${Id}`),
 
-  getPaginatedStaffs: (page, size) =>
-    apiService.get("StaffInfo/getPaginatedStaffInfos", { page, size }),
+  getPaginatedStaffs: (userData) =>
+    apiService.post("StaffInfo/getPaginatedStaffInfos",userData),
 };
 
 export default staffService;

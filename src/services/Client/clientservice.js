@@ -9,6 +9,9 @@ const clientService = {
 
   createClient: (userData) => apiService.post("CustomerProfile/addCustomerProfile", userData),
 
+  
+  getPaginatedCustomerProfiles: (userData) => apiService.post("CustomerProfile/getPaginatedCustomerProfiles", userData),
+
   updateClient: (Id, userData) => apiService.put(`CustomerProfile/updateCustomerProfile`, { ...userData, id: Id }),
 
   deleteClient: (Id) => apiService.delete(`CustomerProfile/DeleteCustomerProfile/${Id}`),
