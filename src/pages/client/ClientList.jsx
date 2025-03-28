@@ -325,7 +325,7 @@ const ClientList = () => {
       ></div>
       <div className="bg-white dark:bg-[#121c2c] rounded-lg shadow w-full flex-grow">
         <div className="flex flex-wrap items-center justify-between p-4">
-          <h3 className="text-lg font-semibold ltr:ml-3 rtl:mr-3">User List</h3>
+          <h3 className="text-lg font-semibold ltr:ml-3 rtl:mr-3">Client List</h3>
           <div className="flex items-center space-x-4">
             <div>
               <button
@@ -334,7 +334,7 @@ const ClientList = () => {
                 onClick={() => setAddTaskModal(true)}
               >
                 <IconPlus className="ltr:mr-2 rtl:ml-2 shrink-0" />
-                Add New User
+                Add New Client
               </button>
             </div>
             <div className="flex items-center border-gray-300 rounded bg-gray-100 dark:bg-[#1b2e4b] p-2 w-50">
