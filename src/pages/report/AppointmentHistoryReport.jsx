@@ -70,6 +70,19 @@ const AppointmentHistoryReport = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    if (!selectDates.startDate || !selectDates.endDate) {
+        setErrors({
+            startDate: selectDates.startDate ? "" : "Start Date is required",
+            endDate: selectDates.endDate ? "" : "End Date is required"
+        });
+        return;
+    }
+
+    if (selectDates.startDate > selectDates.endDate) {
+        alert("Please ensure the Start Date is before the End Date.");
+        return;
+    }
 
     //  Consol.log(`Form submitted successfully! \nStart Date: ${selectDates.startDate} \nEnd Date: ${selectDates.endDate}`);
   };
@@ -83,10 +96,11 @@ const AppointmentHistoryReport = () => {
         );
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
+      const today = new Date().toISOString().split('T')[0];
       link.href = url;
       link.setAttribute(
         "download",
-        `CustomerHistoryReport_${selectedEndDate}.xlsx`
+        `AppointmentHistoryReport_${today}.xlsx`
       );
       document.body.appendChild(link);
       link.click();
@@ -96,6 +110,7 @@ const AppointmentHistoryReport = () => {
   };
 
   return (
+    <form onSubmit={handleSubmit}>
     <div className="flex flex-col gap-5 sm:h-[calc(100vh_-_150px)] h-full">
       <div className="bg-white dark:bg-[#121c2c] rounded-lg shadow w-full flex-grow">
         <div className="flex flex-wrap items-center justify-between p-4">
@@ -202,6 +217,7 @@ const AppointmentHistoryReport = () => {
         )}
       </div>
     </div>
+    </form>
   );
 };
 //     const [createDate, setCreateDate] = useState("");
