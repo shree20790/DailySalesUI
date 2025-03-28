@@ -44,8 +44,9 @@ const PayTypeHistory = () => {
         const response = await payTypeService.downloadPayTypeReport(payType);
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement("a");
+        const today = new Date().toISOString().split('T')[0];
         link.href = url;
-        link.setAttribute("download", `PayTypeHistoryReport_${payType}.xlsx`);
+        link.setAttribute("download", `PayTypeHistoryReport_${today}.xlsx`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
