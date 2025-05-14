@@ -68,7 +68,8 @@
     "sweetalert2-react-content": "^5.0.7",
     "swiper": "^11.1.9",
     "web-vitals": "^4.2.3",
-    "yup": "^1.4.0"
+    "yup": "^1.4.0",
+    "proxy": "https://dailysalesapi.skylynxclass.in"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
@@ -98,6 +99,7 @@
     "react-i18next": "^15.0.1",
     "react-perfect-scrollbar": "^1.5.8",
     "tailwindcss": "^3.4.14",
-    "vite": "^5.4.9"
+    "vite": "^5.4.9",
+    "proxy": "https://dailysalesapi.skylynxclass.in"
   }
 }
